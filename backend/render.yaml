@@ -1,0 +1,10 @@
+# Render.com blueprint for the CareerMaster AI backend API.
+services:
+  - type: web
+    name: careermaster-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false

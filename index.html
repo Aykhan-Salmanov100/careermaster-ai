@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CareerMaster AI — CV-aware interview preparation</title>
+  <meta name="description" content="Upload your CV, run a tailored mock interview, and get real-time STAR coaching while you speak. Runs entirely in your browser." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <!-- NAV -->
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="#top"><span class="dot"></span> CareerMaster AI</a>
+      <nav class="nav-links">
+        <a href="#upload">CV Analysis</a>
+        <a href="#interview">Mock Interview</a>
+        <a href="#live">Live Assistant</a>
+        <a href="https://github.com/" id="repoLink" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="wrap reveal">
+        <p class="eyebrow">CV → Mock Interview → Live Coaching</p>
+        <h1>Walk into interviews <span class="hl">already prepared.</span></h1>
+        <p>Upload your CV and CareerMaster reads it, runs a tailored mock interview, and listens while you speak to coach your answers in real time using the STAR method — all in your browser.</p>
+        <div class="hero-cta">
+          <button class="btn btn-primary" id="ctaStart">Upload your CV →</button>
+          <a class="btn btn-ghost" href="#live">Try the live assistant</a>
+        </div>
+        <div class="hero-meta">
+          <div><b>3</b><span>core tools</span></div>
+          <div><b>100%</b><span>in-browser</span></div>
+          <div><b>STAR</b><span>answer scoring</span></div>
+          <div><b id="aiBadge">Offline</b><span id="aiBadgeLabel">AI status</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. CV ANALYSIS -->
+    <section class="section" id="upload">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="section-num">01 — CV Analysis</span>
+          <h2>Drop in your CV, get an instant read.</h2>
+          <p>PDF or DOCX is parsed in your browser. We extract your contacts, skills, and experience signals, then score ATS-readiness and feed everything into the interview tools below.</p>
+        </div>
+        <div class="grid-2 reveal">
+          <div class="card">
+            <label class="dropzone" id="dropzone">
+              <input type="file" id="cvFile" accept=".pdf,.doc,.docx" />
+              <div class="dz-icon">📄</div>
+              <div class="dz-title">Choose a file or drag it here</div>
+              <div class="dz-sub">PDF or DOCX · stays on your device</div>
+              <div class="dz-filename" id="cvFilename"></div>
+            </label>
+            <div id="parseStatus" class="muted mono" style="font-size:13px; margin-top:14px;">No CV loaded yet.</div>
+            <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap;">
+              <button class="btn btn-sm btn-ghost" id="downloadJson" disabled>Download JSON</button>
+              <button class="btn btn-sm btn-ghost" id="clearCv" disabled>Clear</button>
+            </div>
+          </div>
+
+          <div class="card" id="cvResult" style="display:none;">
+            <div class="score-row" style="margin-bottom:18px;">
+              <div class="score-ring" id="scoreRing"><span id="scoreVal">0</span></div>
+              <div>
+                <div style="font-family:var(--font-display); font-size:18px; font-weight:700;">ATS readiness</div>
+                <div class="muted" style="font-size:14px;" id="scoreSummary">—</div>
+              </div>
+            </div>
+            <dl class="kv" id="cvDetails"></dl>
+            <div style="margin-top:16px;">
+              <div class="q-tag">Detected skills</div>
+              <div class="chips" id="cvSkills"></div>
+            </div>
+            <div style="margin-top:16px;">
+              <div class="q-tag">Suggestions</div>
+              <ul class="note-list" id="cvNotes"></ul>
+            </div>
+          </div>
+        </div>
+        <details style="margin-top:18px;">
+          <summary class="muted mono" style="font-size:13px; cursor:pointer;">View structured JSON</summary>
+          <pre class="code-block" id="cvJson" style="margin-top:10px;">Upload a CV to see structured output.</pre>
+        </details>
+      </div>
+    </section>
+
+    <!-- 2. MOCK INTERVIEW -->
+    <section class="section" id="interview">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="section-num">02 — Mock Interview</span>
+          <h2>Practise questions tailored to your CV.</h2>
+          <p>Pick a target role and difficulty. Questions are built from your detected skills, and every answer is scored against the four STAR dimensions with specific feedback.</p>
+        </div>
+        <div class="grid-2 reveal">
+          <div class="card">
+            <div class="grid-2" style="gap:14px;">
+              <div>
+                <label class="field" for="roleSelect">Target role</label>
+                <select id="roleSelect">
+                  <option value="Software Engineer">Software Engineer</option>
+                  <option value="Backend Engineer">Backend Engineer</option>
+                  <option value="Frontend Engineer">Frontend Engineer</option>
+                  <option value="Full-Stack Engineer">Full-Stack Engineer</option>
+                  <option value="Data Scientist">Data Scientist</option>
+                  <option value="DevOps Engineer">DevOps Engineer</option>
+                  <option value="Product Manager">Product Manager</option>
+                </select>
+              </div>
+              <div>
+                <label class="field" for="difficultySelect">Difficulty</label>
+                <select id="difficultySelect">
+                  <option value="junior">Junior</option>
+                  <option value="mid" selected>Mid-level</option>
+                  <option value="senior">Senior</option>
+                </select>
+              </div>
+            </div>
+            <button class="btn btn-primary" id="generateBtn" style="width:100%; justify-content:center; margin-top:16px;">Generate questions</button>
+            <div class="muted mono" id="genStatus" style="font-size:13px; margin-top:12px;">Upload a CV first for tailored questions (or generate role-based ones now).</div>
+          </div>
+
+          <div class="card" id="interviewPanel" style="display:none;">
+            <div class="q-progress" id="qProgress">Question 1 / 1</div>
+            <p class="q-text" id="qText">—</p>
+            <div class="q-tag" id="qTag"></div>
+            <div class="q-nav">
+              <button class="btn btn-ghost" id="prevBtn">← Previous</button>
+              <button class="btn btn-ghost" id="nextBtn">Next →</button>
+            </div>
+            <label class="field" for="answerInput">Your answer</label>
+            <textarea id="answerInput" placeholder="Type your answer using Situation → Task → Action → Result…"></textarea>
+            <button class="btn btn-primary" id="submitBtn" style="width:100%; justify-content:center; margin-top:14px;">Score my answer</button>
+            <div class="star-feedback" id="starFeedback" style="display:none;">
+              <h4>STAR feedback</h4>
+              <div id="starFeedbackText" class="muted" style="font-size:14px;"></div>
+              <div class="star-row" id="starRow"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. LIVE ASSISTANT -->
+    <section class="section" id="live">
+      <div class="wrap">
+        <div class="section-head reveal">
+          <span class="section-num">03 — Live Interview Assistant</span>
+          <h2>Real-time coaching while you speak.</h2>
+          <p>The assistant transcribes the interviewer's questions live, flags when a question is asked, and surfaces a STAR-shaped prompt drawn from your CV — so you never freeze.</p>
+        </div>
+
+        <div class="live reveal">
+          <div class="live-head">
+            <h3 style="font-size:22px;">Live Interview Assistant</h3>
+            <span class="status-badge" id="liveStatus">Idle</span>
+          </div>
+          <span class="mode-pill">Practice mode</span>
+          <p class="muted" style="font-size:14px; margin-bottom:8px;">Uses your browser's speech recognition. Works best in Chrome or Edge.</p>
+
+          <div class="grid-2" style="gap:14px; margin-top:12px;">
+            <div>
+              <label class="field" for="audioLang">Spoken language</label>
+              <select id="audioLang">
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="es-ES">Spanish</option>
+                <option value="fr-FR">French</option>
+                <option value="de-DE">German</option>
+              </select>
+            </div>
+            <div>
+              <label class="field">Microphone input level</label>
+              <div class="meter"><div id="levelMeter"></div></div>
+              <button class="btn btn-sm btn-ghost" id="micTestBtn" style="margin-top:10px;">Test microphone</button>
+            </div>
+          </div>
+
+          <div class="live-controls">
+            <button class="btn btn-primary" id="startBtn">● Start listening</button>
+            <button class="btn btn-ghost" id="stopBtn" disabled>■ Stop</button>
+          </div>
+
+          <div class="grid-2" style="gap:18px;">
+            <div>
+              <div class="q-tag" style="margin-bottom:8px;">Real-time transcript</div>
+              <div class="transcript" id="transcript"><span class="placeholder">Speech will appear here once you start listening…</span></div>
+              <div class="suggestion" id="liveSuggestion" style="display:none;"></div>
+            </div>
+            <div>
+              <div class="q-tag" style="margin-bottom:8px;">Your CV context</div>
+              <div class="card" id="liveCvContext" style="background:var(--bg-2); font-size:13.5px;">
+                <span class="muted">Upload a CV to ground the suggestions in your own experience.</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="q-tag" style="margin-top:18px;">STAR framework reminder</div>
+          <div class="star-grid">
+            <div class="star-cell"><div class="L">S</div><div class="t">Situation</div><div class="d">Set the scene. Where? When? What was the context?</div></div>
+            <div class="star-cell"><div class="L">T</div><div class="t">Task</div><div class="d">What was your responsibility or the challenge?</div></div>
+            <div class="star-cell"><div class="L">A</div><div class="t">Action</div><div class="d">What specific steps did you take? Be detailed.</div></div>
+            <div class="star-cell"><div class="L">R</div><div class="t">Result</div><div class="d">What was the outcome? Use numbers and metrics.</div></div>
+          </div>
+
+          <div id="sessionSummary" style="display:none; margin-top:24px;">
+            <div class="q-tag" style="margin-bottom:8px;">Session summary</div>
+            <div class="summary-grid">
+              <div class="card"><div class="v" id="sumDuration">—</div><div class="k">duration</div></div>
+              <div class="card"><div class="v" id="sumQuestions" style="color:var(--accent);">—</div><div class="k">questions</div></div>
+              <div class="card"><div class="v" id="sumWords">—</div><div class="k">words</div></div>
+              <div class="card"><div class="v" id="sumStar" style="color:var(--accent-2);">—</div><div class="k">STAR cues</div></div>
+            </div>
+            <button class="btn btn-sm btn-ghost" id="downloadSummaryBtn">Download summary</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>CareerMaster AI · built by Aykhan Salmanov</span>
+      <span class="mono">Runs client-side · optional FastAPI backend for richer AI</span>
+    </div>
+  </footer>
+
+  <!-- Client-side parsers -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
